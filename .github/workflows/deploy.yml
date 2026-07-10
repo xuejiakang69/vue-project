@@ -19,13 +19,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: '22.22.2'
+          node-version: '22'
           cache: 'npm'
 
-      # 🔑 新增：配置 npm 认证令牌
       - name: Configure npm authentication
         run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+            echo "registry=https://packages.aliyun.com/5faa3678e6f9d07f148517ac/npm/npm-registry/" > .npmrc
+            echo "//packages.aliyun.com/5faa3678e6f9d07f148517ac/npm/npm-registry/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
 
 
       - name: Install dependencies
