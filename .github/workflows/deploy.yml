@@ -1,0 +1,50 @@
+name: Deploy
+
+on:
+  # 推送到 main 分支时触发
+  push:
+    branches:
+      - main
+  # 允许手动触发
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy
+        run: |
+          echo "🚀 开始部署..."
+          # 在这里添加你的部署命令
+          # 例如：
+          # - rsync -avz dist/ user@server:/var/www/html/
+          # - aws s3 sync dist/ s3://your-bucket/
+          # - firebase deploy
+          echo "✅ 部署完成！"
+
+      - name: Success notification
+        if: success()
+        run: |
+          echo "========================================="
+          echo "🎉 部署成功！"
+          echo "========================================="
+          echo "分支: ${{ github.ref_name }}"
+          echo "提交: ${{ github.sha }}"
+          echo "时间: $(date)"
+          echo "========================================="
