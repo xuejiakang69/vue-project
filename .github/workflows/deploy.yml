@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - test
   # 允许手动触发
   workflow_dispatch:
 
@@ -21,6 +22,24 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
+
+      # 根据分支判断环境
+      - name: Set Deploy Environment
+        run: |
+
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+
+            echo "ENV=production" >> $GITHUB_ENV
+            echo "DEPLOY_PATH=/www/wwwroot/vue/vue-prod/" >> $GITHUB_ENV
+
+
+          else
+
+            echo "ENV=test" >> $GITHUB_ENV
+            echo "DEPLOY_PATH=/www/wwwroot/vue/vue-test/" >> $GITHUB_ENV
+
+          fi
+
       
       - name: Configure npm authentication
         run: |
@@ -47,7 +66,7 @@ jobs:
           username: root
           password: ${{ secrets.SERVER_PASSWORD }}
           source: "dist/*"
-          target: "/www/wwwroot/vue-project/"
+          target: "${{ env.DEPLOY_PATH }}"
 
 
       - name: Success notification
