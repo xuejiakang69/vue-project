@@ -273,11 +273,7 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
 
 
-          source: |
-
-            dist
-
-            VERSION
+          source: "dist,VERSION"
 
 
           target: "/www/wwwroot/vue/vue-prod/releases/v${{ env.VERSION }}/"
