@@ -130,7 +130,7 @@ npm run lint:check       # ESLint 仅检查
 
 ### 配置
 
-- **baseURL**: 从 `VITE_API_URL` 环境变量读取
+- **baseURL**: 从 `VITE_API_URL` 环境变量自动读取（如 `https://api.xxx.me/api`）
 - **timeout**: 15000ms
 
 ### 拦截器
@@ -150,10 +150,13 @@ npm run lint:check       # ESLint 仅检查
 import request from '@/utils/request'
 
 // GET 请求
-const data = await request.get('/api/users')
+const data = await request.get('/users')  // 实际请求: https://api.xxx.me/api/users
 
 // POST 请求
-const result = await request.post('/api/users', { name: '张三' })
+const result = await request.post('/users', { name: '张三' })
+
+// 带参数请求
+const list = await request.get('/users', { params: { page: 1, size: 10 } })
 ```
 
 ## ESLint 规则
@@ -197,11 +200,10 @@ const result = await request.post('/api/users', { name: '张三' })
 
 ## 待办事项
 
+- [x] 配置路径别名 `@` 指向 `src`
 - [ ] 添加 `src/composables/` 目录，存放组合式函数
 - [ ] 添加 `src/layouts/` 目录，存放布局组件
 - [ ] 添加 `src/styles/` 目录，存放全局样式
-- [ ] 添加 `src/api/` 目录，按模块划分 API 请求
-- [x] 配置路径别名 `@` 指向 `src`
 - [ ] 添加页面加载进度条
 - [ ] 添加全局错误处理
 - [ ] 添加权限路由守卫
@@ -223,4 +225,4 @@ import xxx from '@/components/xxx.vue'
 
 | 日期 | 更新内容 |
 |------|----------|
-| 2026-07-13 | 初始化项目，创建基础结构；配置路径别名 `@`；deploy.yml 添加版本重复校验 |
+| 2026-07-13 | 初始化项目，创建基础结构；配置路径别名 `@`；deploy.yml 添加版本重复校验；封装 Axios |

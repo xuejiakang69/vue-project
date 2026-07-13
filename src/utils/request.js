@@ -1,8 +1,9 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
+// 创建 axios 实例
 const service = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL, // 自动读取 .env 中的 API 前缀
   timeout: 15000,
 })
 
