@@ -1,77 +1,293 @@
-name: Deploy
+name: Deploy Vue Project
+
 
 on:
-  # 推送到 main 分支时触发
+
   push:
     branches:
       - main
       - test
-  # 允许手动触发
+
   workflow_dispatch:
 
+
+
 jobs:
+
   deploy:
+
     runs-on: ubuntu-latest
 
+
     steps:
+
+
+      # 拉取代码
       - name: Checkout code
         uses: actions/checkout@v5
 
+
+
+      # Node环境
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: npm
 
-      # 根据分支判断环境
+
+
+      # 判断环境
       - name: Set Deploy Environment
         run: |
 
+
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
 
+
             echo "ENV=production" >> $GITHUB_ENV
+
+            echo "IS_PROD=true" >> $GITHUB_ENV
+
+
             echo "DEPLOY_PATH=/www/wwwroot/vue/vue-prod/" >> $GITHUB_ENV
+
 
 
           else
 
+
             echo "ENV=test" >> $GITHUB_ENV
+
+            echo "IS_PROD=false" >> $GITHUB_ENV
+
+
             echo "DEPLOY_PATH=/www/wwwroot/vue/vue-test/" >> $GITHUB_ENV
 
           fi
 
-      
+
+
+      # npm私服配置
       - name: Configure npm authentication
         run: |
+
+
           echo "registry=https://packages.aliyun.com/5faa3678e6f9d07f148517ac/npm/npm-registry/" > .npmrc
+
+
           echo "//packages.aliyun.com/5faa3678e6f9d07f148517ac/npm/npm-registry/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
 
 
-      - name: Configure npm authentication
-        run: |
-            echo "registry=https://packages.aliyun.com/5faa3678e6f9d07f148517ac/npm/npm-registry/" > .npmrc
-            echo "//packages.aliyun.com/5faa3678e6f9d07f148517ac/npm/npm-registry/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
 
-
+      # 安装依赖
       - name: Install dependencies
         run: npm ci
 
+
+
+      # 构建
       - name: Build
         run: npm run build
 
-      - name: Deploy to Alibaba Cloud
-        uses: appleboy/scp-action@v0.1.7
+
+      ########################################
+      # 获取版本号
+      ########################################
+
+
+      - name: Get Version
+        if: env.IS_PROD == 'true'
+        run: |
+
+
+          VERSION=$(cat VERSION)
+
+
+          if [ -z "$VERSION" ]; then
+
+            echo "VERSION 文件为空"
+
+            exit 1
+
+          fi
+
+
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+
+
+          echo "当前生产版本: v$VERSION"
+
+
+
+      ########################################
+      # 正式环境 main
+      ########################################
+
+      # 检查版本是否已存在
+      - name: Check Version Exists
+        if: env.IS_PROD == 'true'
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: root
           password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            if [ -d "/www/wwwroot/vue/vue-prod/releases/v${{ env.VERSION }}" ]; then
+              echo "================================"
+              echo "❌ 错误: 版本 v${{ env.VERSION }} 已存在"
+              echo "请修改 VERSION 文件后重试"
+              echo "================================"
+              exit 1
+            fi
+            echo "✅ 版本 v${{ env.VERSION }} 可用"
+
+      # 上传版本目录
+      - name: Upload Production Version
+        if: env.IS_PROD == 'true'
+
+        uses: appleboy/scp-action@v0.1.7
+
+
+        with:
+
+
+          host: ${{ secrets.SERVER_HOST }}
+
+          username: root
+
+          password: ${{ secrets.SERVER_PASSWORD }}
+
+
           source: "dist/*"
+
+
+          target: "/www/wwwroot/vue/vue-prod/releases/v${{ env.VERSION }}/"
+
+
+      # 切换current
+      - name: Switch Current Version
+        if: env.IS_PROD == 'true'
+
+        uses: appleboy/ssh-action@v1.0.3
+
+
+        with:
+
+
+          host: ${{ secrets.SERVER_HOST }}
+
+          username: root
+
+          password: ${{ secrets.SERVER_PASSWORD }}
+
+
+          script: |
+
+
+            cd /www/wwwroot/vue/vue-prod
+
+
+
+            rm -rf current
+
+
+
+            cp -r releases/v${{ env.VERSION }} current
+
+
+
+            echo "================================"
+
+            echo "生产环境切换完成"
+
+            echo "当前版本: v${{ env.VERSION }}"
+
+            echo "================================"
+
+
+      # 保留最近3个版本
+      # 当前 + 两个旧版本
+      - name: Clean Old Versions
+        if: env.IS_PROD == 'true'
+
+        uses: appleboy/ssh-action@v1.0.3
+
+
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+
+          username: root
+
+          password: ${{ secrets.SERVER_PASSWORD }}
+
+
+          script: |
+
+
+            cd /www/wwwroot/vue/vue-prod/releases
+
+
+
+            ls -dt v* | tail -n +4 | xargs -r rm -rf
+
+
+
+            echo "历史版本清理完成"
+
+
+      ########################################
+      # 测试环境 test
+      ########################################
+
+
+
+      - name: Deploy Test Environment
+        if: env.IS_PROD == 'false'
+
+
+        uses: appleboy/scp-action@v0.1.7
+
+
+
+        with:
+
+
+          host: ${{ secrets.SERVER_HOST }}
+
+          username: root
+
+          password: ${{ secrets.SERVER_PASSWORD }}
+
+
+          source: "dist/*"
+
+
           target: "${{ env.DEPLOY_PATH }}"
 
 
+      # 部署成功提示
       - name: Success notification
+
         if: success()
+
         run: |
+
+
           echo "========================================="
-          echo "🎉 部署成功！"
+
+          echo "🎉 Vue部署成功"
+
+          echo "环境: ${{ env.ENV }}"
+
+
+
+          if [ "${{ env.IS_PROD }}" = "true" ]; then
+
+            echo "版本: v${{ env.VERSION }}"
+
+          fi
+
+
           echo "========================================="
