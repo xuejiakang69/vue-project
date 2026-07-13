@@ -136,7 +136,7 @@ jobs:
           username: root
           password: ${{ secrets.SERVER_PASSWORD }}
           source: |
-            dist
+            dist/*
             VERSION
           target: "/www/wwwroot/vue/vue-prod/releases/v${{ env.VERSION }}/"
 
