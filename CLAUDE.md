@@ -54,7 +54,7 @@ vue-project/
 | `VITE_APP_ENV` | development | test | production |
 | `VITE_API_URL` | /api（代理） | https://test-api.xxx.me/api | https://api.xxx.me/api |
 
-**代理配置**：开发环境 `/api` → `http://localhost:8088`，前端端口 `8087`
+**代理配置**：开发环境 `/api` → `http://localhost:8080`
 
 ---
 
