@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import router from '@/router'
 
 // 创建 axios 实例
 const service = axios.create({
@@ -10,11 +11,12 @@ const service = axios.create({
 // 请求拦截器
 service.interceptors.request.use(
   (config) => {
-    // 在这里可以添加 token 等认证信息
-    // const token = localStorage.getItem('token')
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`
-    // }
+    // 从 localStorage 获取 token
+    const token = localStorage.getItem('token')
+    if (token) {
+      // 将 token 添加到请求头
+      config.headers.Authorization = `Bearer ${token}`
+    }
     return config
   },
   (error) => {
@@ -28,8 +30,7 @@ service.interceptors.response.use(
     const res = response.data
 
     // 根据后端约定的 code 判断请求是否成功
-    // 这里假设 code === 0 或 code === 200 表示成功
-    if (res.code !== undefined && res.code !== 0 && res.code !== 200) {
+    if (res.code !== undefined && res.code !== 200) {
       ElMessage.error(res.message || '请求失败')
       return Promise.reject(new Error(res.message || '请求失败'))
     }
@@ -50,10 +51,11 @@ service.interceptors.response.use(
       const message = errorMessages[response.status] || `连接错误 ${response.status}`
       ElMessage.error(message)
 
-      // 401 跳转登录页（如需）
-      // if (response.status === 401) {
-      //   router.push('/login')
-      // }
+      // 401 清除 token 并跳转登录页
+      if (response.status === 401) {
+        localStorage.removeItem('token')
+        router.push('/login')
+      }
     } else {
       ElMessage.error('网络连接异常，请检查网络')
     }

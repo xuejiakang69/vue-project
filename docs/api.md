@@ -9,18 +9,29 @@
 
 ---
 
-## 一、用户模块
+## 一、认证模块
 
-### 1.1 登录注册
+### 1.1 登录认证
 
 | 接口 | 方法 | 参数 | 返回值 | Mock 状态 | 说明 |
 |------|------|------|--------|-----------|------|
-| `/api/user/login` | POST | `phone`: string, `code`: string | `token`: string, `userInfo`: object | ⏳ 待开发 | 手机号+验证码登录 |
-| `/api/user/send-code` | POST | `phone`: string | `success`: boolean | ⏳ 待开发 | 发送验证码 |
-| `/api/user/info` | GET | - | `userInfo`: object | ⏳ 待开发 | 获取当前用户信息 |
-| `/api/user/logout` | POST | - | `success`: boolean | ⏳ 待开发 | 退出登录 |
+| `/api/auth/login` | POST | `username`: string, `password`: string | `token`: string, `userInfo`: object, `needChangePassword`: boolean | ✅ 已对接 | 用户名+密码登录 |
+| `/api/auth/change-password` | POST | `oldPassword`: string, `newPassword`: string | - | ✅ 已对接 | 修改密码 |
+| `/api/auth/apply` | POST | `username`: string, `realName`: string, `phone`: string, `email`: string, `department`: string | - | ✅ 已对接 | 账号申请 |
+| `/api/auth/userinfo` | GET | - | `userInfo`: object | ✅ 已对接 | 获取当前用户信息 |
 
-### 1.2 用户管理
+### 1.2 用户审批
+
+| 接口 | 方法 | 参数 | 返回值 | Mock 状态 | 说明 |
+|------|------|------|--------|-----------|------|
+| `/api/users/pending` | GET | - | `list`: array | ✅ 已对接 | 获取待审批用户列表 |
+| `/api/users/approve/{userId}` | POST | `action`: string (APPROVE/REJECT) | `initialPassword`: string (通过时) | ✅ 已对接 | 审批账号 |
+
+---
+
+## 二、用户模块
+
+### 2.1 用户管理
 
 | 接口 | 方法 | 参数 | 返回值 | Mock 状态 | 说明 |
 |------|------|------|--------|-----------|------|
@@ -30,9 +41,9 @@
 
 ---
 
-## 二、商品模块
+## 三、商品模块
 
-### 2.1 商品分类
+### 3.1 商品分类
 
 | 接口 | 方法 | 参数 | 返回值 | Mock 状态 | 说明 |
 |------|------|------|--------|-----------|------|
@@ -41,7 +52,7 @@
 | `/api/admin/category/update` | PUT | `id`: number, `name`: string, `sort`: number | `success`: boolean | ⏳ 待开发 | 更新分类 |
 | `/api/admin/category/delete` | DELETE | `id`: number | `success`: boolean | ⏳ 待开发 | 删除分类 |
 
-### 2.2 品牌管理
+### 3.2 品牌管理
 
 | 接口 | 方法 | 参数 | 返回值 | Mock 状态 | 说明 |
 |------|------|------|--------|-----------|------|
@@ -50,7 +61,7 @@
 | `/api/admin/brand/update` | PUT | `id`: number, `name`: string, `logo`: string | `success`: boolean | ⏳ 待开发 | 更新品牌 |
 | `/api/admin/brand/delete` | DELETE | `id`: number | `success`: boolean | ⏳ 待开发 | 删除品牌 |
 
-### 2.3 SPU 管理
+### 3.3 SPU 管理
 
 | 接口 | 方法 | 参数 | 返回值 | Mock 状态 | 说明 |
 |------|------|------|--------|-----------|------|
@@ -60,7 +71,7 @@
 | `/api/admin/spu/update` | PUT | `id`: number, ...（同 add） | `success`: boolean | ⏳ 待开发 | 更新 SPU |
 | `/api/admin/spu/status` | PUT | `id`: number, `status`: number | `success`: boolean | ⏳ 待开发 | 上架/下架 |
 
-### 2.4 SKU 管理
+### 3.4 SKU 管理
 
 | 接口 | 方法 | 参数 | 返回值 | Mock 状态 | 说明 |
 |------|------|------|--------|-----------|------|
@@ -69,9 +80,9 @@
 
 ---
 
-## 三、订单模块
+## 四、订单模块
 
-### 3.1 订单管理
+### 4.1 订单管理
 
 | 接口 | 方法 | 参数 | 返回值 | Mock 状态 | 说明 |
 |------|------|------|--------|-----------|------|
@@ -84,7 +95,7 @@
 
 ---
 
-## 四、优惠券模块
+## 五、优惠券模块
 
 | 接口 | 方法 | 参数 | 返回值 | Mock 状态 | 说明 |
 |------|------|------|--------|-----------|------|
@@ -96,9 +107,9 @@
 
 ---
 
-## 五、内容管理模块
+## 六、内容管理模块
 
-### 5.1 Banner 管理
+### 6.1 Banner 管理
 
 | 接口 | 方法 | 参数 | 返回值 | Mock 状态 | 说明 |
 |------|------|------|--------|-----------|------|
@@ -108,7 +119,7 @@
 | `/api/admin/banner/delete` | DELETE | `id`: number | `success`: boolean | ⏳ 待开发 | 删除 Banner |
 | `/api/admin/banner/status` | PUT | `id`: number, `status`: number | `success`: boolean | ⏳ 待开发 | 上架/下架 |
 
-### 5.2 推荐位管理
+### 6.2 推荐位管理
 
 | 接口 | 方法 | 参数 | 返回值 | Mock 状态 | 说明 |
 |------|------|------|--------|-----------|------|
@@ -118,7 +129,7 @@
 
 ---
 
-## 六、评价管理模块
+## 七、评价管理模块
 
 | 接口 | 方法 | 参数 | 返回值 | Mock 状态 | 说明 |
 |------|------|------|--------|-----------|------|
@@ -128,7 +139,7 @@
 
 ---
 
-## 七、数据统计模块
+## 八、数据统计模块
 
 | 接口 | 方法 | 参数 | 返回值 | Mock 状态 | 说明 |
 |------|------|------|--------|-----------|------|
@@ -140,9 +151,9 @@
 
 ---
 
-## 八、系统管理模块
+## 九、系统管理模块
 
-### 8.1 角色管理
+### 9.1 角色管理
 
 | 接口 | 方法 | 参数 | 返回值 | Mock 状态 | 说明 |
 |------|------|------|--------|-----------|------|
@@ -151,7 +162,7 @@
 | `/api/admin/role/update` | PUT | `id`: number, ...（同 add） | `success`: boolean | ⏳ 待开发 | 更新角色 |
 | `/api/admin/role/delete` | DELETE | `id`: number | `success`: boolean | ⏳ 待开发 | 删除角色 |
 
-### 8.2 菜单管理
+### 9.2 菜单管理
 
 | 接口 | 方法 | 参数 | 返回值 | Mock 状态 | 说明 |
 |------|------|------|--------|-----------|------|
@@ -160,7 +171,7 @@
 | `/api/admin/menu/update` | PUT | `id`: number, ...（同 add） | `success`: boolean | ⏳ 待开发 | 更新菜单 |
 | `/api/admin/menu/delete` | DELETE | `id`: number | `success`: boolean | ⏳ 待开发 | 删除菜单 |
 
-### 8.3 操作日志
+### 9.3 操作日志
 
 | 接口 | 方法 | 参数 | 返回值 | Mock 状态 | 说明 |
 |------|------|------|--------|-----------|------|
@@ -169,7 +180,7 @@
 
 ---
 
-## 九、文件上传
+## 十、文件上传
 
 | 接口 | 方法 | 参数 | 返回值 | Mock 状态 | 说明 |
 |------|------|------|--------|-----------|------|
@@ -177,16 +188,16 @@
 
 ---
 
-## 十、接口统计
+## 十一、接口统计
 
 | 状态 | 数量 |
 |------|------|
-| ✅ 已对接 | 0 |
+| ✅ 已对接 | 6 |
 | 🔄 Mock 中 | 0 |
-| ⏳ 待开发 | 60 |
+| ⏳ 待开发 | 54 |
 | **总计** | **60** |
 
 ---
 
 *文档创建时间：2026-08-20*
-*最后更新：2026-08-20*
+*最后更新：2026-08-21*
