@@ -93,8 +93,31 @@ jobs:
       ########################################
 
       - name: Build
-        run: npm run build
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            npm run build:prod
+          else
+            npm run build:test
+          fi
 
+
+      
+      - name: Debug Build Files
+        run: |
+          echo "================================"
+          echo "当前分支: ${{ github.ref_name }}"
+          echo "当前环境: $ENV"
+          echo "================================"
+
+          echo "API地址检查:"
+          grep -R -oE 'https://api(-test)?\.online3\.me' dist | sort -u || true
+
+          echo "================================"
+
+          pwd
+          ls -la
+          ls -la dist
+          ls -la VERSION
 
 
       ########################################
