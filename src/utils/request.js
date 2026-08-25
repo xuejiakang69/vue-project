@@ -7,6 +7,8 @@ const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL, // 自动读取 .env 中的 API 前缀
   timeout: 15000,
 })
+console.log('当前 API 地址:', import.meta.env.VITE_API_BASE_URL)
+console.log('Axios baseURL:', service.defaults.baseURL)
 
 // 请求拦截器
 service.interceptors.request.use(
